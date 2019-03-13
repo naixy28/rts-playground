@@ -1,10 +1,9 @@
 import * as React from 'react'
-import { BehaviorSubject, interval, empty } from 'rxjs'
-import { switchMap, scan } from 'rxjs/operators'
-
+import { BehaviorSubject, interval, empty, fromEvent, combineLatest, throwError } from 'rxjs'
+import { switchMap, scan, startWith, map, takeWhile, tap } from 'rxjs/operators'
 
 interface Letter {
-  letter: String;
+  letter: string;
   yPos: number;
 }
 interface Letters {
@@ -17,28 +16,43 @@ interface State {
   level: number;
 }
 
+enum GameStatus {
+  start,
+  end
+}
+
 const randomLetter = (): string => String.fromCharCode(Math.random() * ('z'.charCodeAt(0) - 'a'.charCodeAt(0)) + 'a'.charCodeAt(0))
+const noop = () => {}
+
 const levelChangeThreshold = 20
 const speedAdjust = 50
 const endThreshold = 15
 const gameWith = 30
 const initSpeed = 600
 
-class AlphabetInvasion extends React.Component {
-  state = {
-    intervalSubject: null,
-    letters$: null,
+class AlphabetInvasion extends React.Component<any, State> {
+  public intervalSubject!: BehaviorSubject<number>
+  public letters$
+  public keys$
+  public game$
+  public $el!: HTMLDivElement
+
+  state: State = {
+    score: 0,
+    letters: [],
+    level: 1,
+
   }
 
   componentWillUnmount() {
-    this.state.letters$.next(0)
+    this.letters$.next(0)
   }
 
   componentDidMount() {
-    const intervalSubject = new BehaviorSubject(initSpeed)
-    const letters$ = intervalSubject.pipe(
-      switchMap(i => i ? interval(i) : empty()
-        .pipe(
+    this.intervalSubject = new BehaviorSubject(initSpeed)
+    this.letters$ = this.intervalSubject.pipe(
+      switchMap(i => i
+        ? interval(i).pipe(
           scan<number, Letters>(letters => ({
             intrvl: i,
             ltrs: [
@@ -48,23 +62,81 @@ class AlphabetInvasion extends React.Component {
               },
               ...letters.ltrs
             ]
-          }), { ltrs: [], intrvl: 0 })
+          }), { ltrs: [], intrvl: 0 }),
         )
+        : empty()
       )
     )
 
-    letters$.subscribe(console.log)
+    this.keys$ = fromEvent(document, 'keydown')
+      .pipe(
+        startWith({ key: '' }),
+        map((e: KeyboardEvent) => e.key)
+      )
 
-    this.setState({
-      intervalSubject,
-      letters$,
+    this.game$ = combineLatest(this.keys$, this.letters$)
+      .pipe(
+        scan< [string, Letters], State>((state, [key, letters]) => (
+          letters.ltrs[letters.ltrs.length - 1]
+            && letters.ltrs[letters.ltrs.length - 1].letter === key
+            ? (state.score += 1, letters.ltrs.pop())
+            : noop,
+
+          state.score > 0 && state.score % levelChangeThreshold === 0
+            ? (
+              letters.ltrs = [],
+              state.level += 1,
+              state.score += 1,
+              this.intervalSubject.next(letters.intrvl - speedAdjust)
+            )
+            : noop,
+
+            { score: state.score, letters: letters.ltrs, level: state.level }
+        ), { score: 0, letters: [], level: 1 }),
+        // tap(() => {
+        //   debugger
+        // }),
+        takeWhile(state => state.letters.length < endThreshold)
+      )
+        
+    this.game$.subscribe(
+      (state: State) => {
+        this.setState(state)
+      },
+      console.log,
+      (state: State) => {
+        this.setState(state)
+      }
+    )
+
+    // this.letters$.subscribe(console.log)
+
+  }
+
+  renderGame(state: State) {
+    if (!state) {
+      return ''
+    }
+    let innerHtml = `Score: ${this.state.score}, Level: ${this.state.level} <br/>`
+
+    state.letters.forEach(l => {
+      innerHtml += '&nbsp'.repeat(l.yPos) + l.letter + '<br/>'
     })
+    innerHtml += '<br/>'.repeat(endThreshold - state.letters.length - 1) + '-'.repeat(gameWith)
+
+    return innerHtml
+  }
+
+  renderGameOver() {
+    this.$el.innerHTML += '<br/>GAME OVER!'
   }
 
   render() {
+
+    console.log(this.state)
+
     return (
-    <div>
-      space
+    <div ref={el => this.$el = el} dangerouslySetInnerHTML={{ __html: this.renderGame(this.state) }}>
     </div>)
   }
 }
