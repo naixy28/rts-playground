@@ -1,6 +1,6 @@
 import * as React from 'react'
-import { BehaviorSubject, interval, empty, fromEvent, combineLatest, throwError } from 'rxjs'
-import { switchMap, scan, startWith, map, takeWhile, tap } from 'rxjs/operators'
+import { BehaviorSubject, interval, empty, fromEvent, combineLatest, Observable } from 'rxjs'
+import { switchMap, scan, startWith, map, takeWhile } from 'rxjs/operators'
 
 interface Letter {
   letter: string;
@@ -14,6 +14,7 @@ interface State {
   score: number;
   letters: Letter[];
   level: number;
+  gameStatus?: GameStatus
 }
 
 enum GameStatus {
@@ -33,15 +34,15 @@ const initSpeed = 600
 class AlphabetInvasion extends React.Component<any, State> {
   public intervalSubject!: BehaviorSubject<number>
   public letters$
-  public keys$
-  public game$
+  public keys$!: Observable<string>
+  public game$: Observable<any>
   public $el!: HTMLDivElement
 
   state: State = {
     score: 0,
     letters: [],
     level: 1,
-
+    gameStatus: GameStatus.start
   }
 
   componentWillUnmount() {
@@ -103,20 +104,16 @@ class AlphabetInvasion extends React.Component<any, State> {
       (state: State) => {
         this.setState(state)
       },
-      console.log,
-      (state: State) => {
-        this.setState(state)
+      noop,
+      () => {
+        this.setState({
+          gameStatus: GameStatus.end,
+        })
       }
     )
-
-    // this.letters$.subscribe(console.log)
-
   }
 
   renderGame(state: State) {
-    if (!state) {
-      return ''
-    }
     let innerHtml = `Score: ${this.state.score}, Level: ${this.state.level} <br/>`
 
     state.letters.forEach(l => {
@@ -128,15 +125,15 @@ class AlphabetInvasion extends React.Component<any, State> {
   }
 
   renderGameOver() {
-    this.$el.innerHTML += '<br/>GAME OVER!'
+    return '<br/>GAME OVER!'
   }
 
   render() {
-
-    console.log(this.state)
+    const text = this.renderGame(this.state) + (this.state.gameStatus === GameStatus.end ? this.renderGameOver() : ''
+  )
 
     return (
-    <div ref={el => this.$el = el} dangerouslySetInnerHTML={{ __html: this.renderGame(this.state) }}>
+    <div ref={el => this.$el = el} dangerouslySetInnerHTML={{ __html: text }}>
     </div>)
   }
 }
