@@ -33,7 +33,7 @@ const initSpeed = 600
 
 class AlphabetInvasion extends React.Component<any, State> {
   public intervalSubject!: BehaviorSubject<number>
-  public letters$
+  public letters$!: Observable<Letters> | BehaviorSubject<number> // rxjs在类型推断上有问题 或者这里就直接any
   public keys$!: Observable<string>
   public game$: Observable<any>
   public $el!: HTMLDivElement
@@ -46,7 +46,7 @@ class AlphabetInvasion extends React.Component<any, State> {
   }
 
   componentWillUnmount() {
-    this.letters$.next(0)
+    (this.letters$ as  BehaviorSubject<number>).next(0) // 利用了联合类型的类型断言
   }
 
   componentDidMount() {
@@ -94,9 +94,6 @@ class AlphabetInvasion extends React.Component<any, State> {
 
             { score: state.score, letters: letters.ltrs, level: state.level }
         ), { score: 0, letters: [], level: 1 }),
-        // tap(() => {
-        //   debugger
-        // }),
         takeWhile(state => state.letters.length < endThreshold)
       )
         
