@@ -25,13 +25,6 @@ export default {
 			//   }
       // },
       {
-        test: /\.tsx$/,
-        exclude: /node_modules/,
-        use: {
-          loader: 'awesome-typescript-loader'
-        }
-      },
-      {
         test: /\.styl$/,
         exclude: /node_modules/,
         use: [
@@ -42,12 +35,20 @@ export default {
               modules: true,
               import: true,
               importLoaders: 1,
-              localIdentName: '[path]__[name]__[local]--[hash:base64:5]'
+              localIdentName: '[path]__[name]__[local]--[hash:base64:5]',
+              // camelCase: true,
             }
           },
           'stylus-loader',
         ]
-      }
+      },
+      {
+        test: /\.tsx$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'awesome-typescript-loader'
+        }
+      },
     ]
   },
   plugins: [
