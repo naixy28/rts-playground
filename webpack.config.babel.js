@@ -42,7 +42,7 @@ export default {
               modules: true,
               import: true,
               importLoaders: 1,
-              localIdentName: '[path][name]__[local]--[hash:base64:5]'
+              localIdentName: '[path]__[name]__[local]--[hash:base64:5]'
             }
           },
           'stylus-loader',
