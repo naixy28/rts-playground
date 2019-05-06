@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Observable, of, fromEvent, Subject, Subscription } from 'rxjs'
+import { Observable, of, fromEvent, Subject, Subscription, BehaviorSubject } from 'rxjs'
 import { expand, filter, map, tap, throttleTime, withLatestFrom } from 'rxjs/operators';
 
 const style = require('./style2.styl')
@@ -13,7 +13,9 @@ interface IFrameData {
   deltaTime: number
 }
 
-let velocity = 500
+// let velocity = 500
+let velocitySubject = new BehaviorSubject(0)
+const easeIn = (x: number): number => Math.sqrt(x) * 30
 
 const calculateStep: (prevFrame: IFrameData) => Observable<IFrameData> = (prevFrame: IFrameData) => {
   return Observable.create(observer => {
@@ -43,14 +45,14 @@ class ChasingBall extends React.Component<any, IPosition> {
     )
   private mouseSubject: Subject<IPosition> = new Subject()
   private mouseMove$: Observable<IPosition> = this.mouseSubject.pipe(
-      throttleTime(50),
+      throttleTime(30),
     )
   
   handleMouseEnter = () => {
     this.gameSubscription = this.frame$
       .pipe(
-        withLatestFrom(this.mouseMove$),
-        map(([deltaTime, position]) => this.update(deltaTime, position, this.state)),
+        withLatestFrom(this.mouseMove$, velocitySubject),
+        map(([deltaTime, position, velocity]) => this.update(deltaTime, position, this.state, velocity)),
       )
       .subscribe(({left, top}) => {
         this.setState({
@@ -72,10 +74,10 @@ class ChasingBall extends React.Component<any, IPosition> {
     this.gameSubscription.unsubscribe()
   }
 
-  update(deltaTime: number, position: IPosition, prevPosition: IPosition): IPosition {
-    if (position && prevPosition) {
-      const deltaX = ~~(position.left - prevPosition.left)
-      const deltaY = ~~(position.top - prevPosition.top)
+  update(deltaTime: number, mousePosition: IPosition, prevPosition: IPosition, velocity: number): IPosition {
+    if (mousePosition && prevPosition) {
+      const deltaX = ~~(mousePosition.left - prevPosition.left)
+      const deltaY = ~~(mousePosition.top - prevPosition.top)
 
       if (Math.abs(deltaX) <= 5 && Math.abs(deltaY) <= 5) {
         return prevPosition
@@ -86,6 +88,11 @@ class ChasingBall extends React.Component<any, IPosition> {
 
       velocityX = deltaX === Math.abs(deltaX) ? velocityX : -1 * velocityX
       velocityY = deltaY === Math.abs(deltaY) ? velocityY : -1 * velocityY
+
+      // calculate velocity
+      const delta = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
+
+      velocitySubject.next(easeIn(delta))
 
       return {
         left: prevPosition.left + deltaTime * velocityX,
