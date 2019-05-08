@@ -29,6 +29,7 @@ const calculateStep: (prevFrame: IFrameData) => Observable<IFrameData> = (prevFr
     })
   })
 }
+const clamp30 = (interval: number): number => interval > 1 / 30 ? 1 / 30 : interval
 
 class ChasingBall extends React.Component<any, IPosition> {
 
@@ -41,7 +42,8 @@ class ChasingBall extends React.Component<any, IPosition> {
     .pipe(
       expand(val => calculateStep(val)),
       filter(frame => frame !== undefined),
-      map(frame => frame.deltaTime)
+      map(frame => frame.deltaTime),
+      map(clamp30)
     )
   private mouseSubject: Subject<IPosition> = new Subject()
   private mouseMove$: Observable<IPosition> = this.mouseSubject.pipe(
