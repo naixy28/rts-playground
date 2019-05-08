@@ -5,6 +5,9 @@ import { Events } from './types'
 import { Subject, interval, merge, from, BehaviorSubject, concat, of, timer, pipe } from 'rxjs'
 import { switchMap, tap, takeUntil, share, take, switchMapTo, concatMap, publish, withLatestFrom, map, takeWhile, first } from 'rxjs/operators';
 
+import { create } from 'rxjs-spy'
+import { tag } from 'rxjs-spy/operators'
+
 type State = {
   active: number,
   lock: boolean,
@@ -29,7 +32,8 @@ export default class LuckyMachine extends React.Component<any, State>{
         }, 2000)
       }))
     }),
-    share()
+    share(),
+    tag('fetch')
   )
 
   fakeRolling$ = this.startSubject.pipe(
@@ -43,6 +47,7 @@ export default class LuckyMachine extends React.Component<any, State>{
           this.setState({active: this.state.active + 1})
         }),
         takeUntil(this.fetchResult$),
+        tag('fake rolling')
       )
     }),
   )
@@ -74,12 +79,13 @@ export default class LuckyMachine extends React.Component<any, State>{
           const condition = !(v === (this.state.active % 8) && currRollCount === rollCount)
           
           return condition
-        })
+        }),
+        tag('slowing interval')
       ), of(1).pipe(
-        tap(() => {console.log('end')})
+        tag('end')
       ))
     }),
-    // concat(this.showResult$)
+    tag('real rolling')
   )
 
   
@@ -100,6 +106,9 @@ export default class LuckyMachine extends React.Component<any, State>{
   }
 
   componentDidMount() {
+    const spy = create()
+
+    spy.log(/\w*/)
     merge(
       this.fakeRolling$,
       // concat(this.realRolling$, this.showResult$),
