@@ -63,7 +63,7 @@ export default class LuckyMachine extends React.Component<any, State>{
 
       this.intervalSubject.next(speed)
 
-      return this.interval$.pipe(
+      return concat(this.interval$.pipe(
         tap(() => {
           this.setState({active: this.state.active + 1})
           currRollCount += 1
@@ -74,8 +74,10 @@ export default class LuckyMachine extends React.Component<any, State>{
           const condition = !(v === (this.state.active % 8) && currRollCount === rollCount)
           
           return condition
-        }),
-      )
+        })
+      ), of(1).pipe(
+        tap(() => {console.log('end')})
+      ))
     }),
     // concat(this.showResult$)
   )
