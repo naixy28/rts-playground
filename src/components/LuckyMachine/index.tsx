@@ -2,8 +2,8 @@ import * as React from 'react'
 
 import Blocks from './Blocks'
 import { Events } from './types'
-import { Subject, interval, merge, from, BehaviorSubject, concat, of, timer, pipe } from 'rxjs'
-import { switchMap, tap, takeUntil, share, take, switchMapTo, concatMap, publish, withLatestFrom, map, takeWhile, first } from 'rxjs/operators';
+import { Subject, interval, merge, from, concat, of, timer } from 'rxjs'
+import { switchMap, tap, takeUntil, share, takeWhile, first } from 'rxjs/operators';
 
 import { create } from 'rxjs-spy'
 import { tag } from 'rxjs-spy/operators'
@@ -16,12 +16,17 @@ type State = {
 export default class LuckyMachine extends React.Component<any, State>{
 
   state = {
-    active: 2,
+    active: 2, // default active value
     lock: false,
   }
 
+  // emit start signal
   startSubject = new Subject<number>()
 
+  /**
+   * simulate a network request resolves after 2 seconds, triggered by start signal
+   * this observable should be shared, for there are more than once subscription to it
+   */
   fetchResult$ = this.startSubject.pipe(
     switchMap(() => {
       return from(new Promise(resolve => {
@@ -36,6 +41,10 @@ export default class LuckyMachine extends React.Component<any, State>{
     tag('fetch')
   )
 
+  /**
+   * fake rolling during fetching, triggered by start signal, ended by fetch succeed
+   * this would do subscribe to fetchResult$
+   */
   fakeRolling$ = this.startSubject.pipe(
     tap(() => {
       this.lock()
@@ -51,7 +60,10 @@ export default class LuckyMachine extends React.Component<any, State>{
       )
     }),
   )
-
+  
+  /**
+   * to slow down the duration of rolling, return a slower timer each time
+   */
   intervalSubject = new Subject<number>()
 
   interval$ = this.intervalSubject.pipe(
@@ -60,6 +72,10 @@ export default class LuckyMachine extends React.Component<any, State>{
     share()
   )
 
+  /**
+   * the slowing down rolling triggered by fetchResult$,
+   * when this ob is subscribed, fetchResult would also be subscribed,
+   */
   realRolling$ = this.fetchResult$.pipe(
     switchMap((v: number) => {
       const rollCount = v + 16 - (this.state.active % 8)
@@ -111,7 +127,6 @@ export default class LuckyMachine extends React.Component<any, State>{
     spy.log(/\w*/)
     merge(
       this.fakeRolling$,
-      // concat(this.realRolling$, this.showResult$),
       this.realRolling$,
       this.interval$,
     ).subscribe()

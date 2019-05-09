@@ -5,6 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title><%= htmlWebpackPlugin.options.title || ''%></title>
+  <script src="https://www.gstatic.com/firebasejs/6.0.1/firebase-app.js"></script>
+  <script>
+    // Your web app's Firebase configuration
+    var firebaseConfig = {
+      apiKey: "AIzaSyAspg4_1YwEuL-enKv5tOmRsTvtOfB59m8",
+      authDomain: "naixy28-home.firebaseapp.com",
+      databaseURL: "https://naixy28-home.firebaseio.com",
+      projectId: "naixy28-home",
+      storageBucket: "naixy28-home.appspot.com",
+      messagingSenderId: "122798169361",
+      appId: "1:122798169361:web:9466eb1391bbaf54"
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+  </script>
 </head>
 <body>
   <div id="root"></div>
