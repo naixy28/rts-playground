@@ -2,17 +2,19 @@ import path from 'path'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
 import webpack from 'webpack'
 
+import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer'
+
 // const path = require('path')
 
 export default {
 // module.exports = {
-  devtool: 'eval',
+  devtool: 'none',
   mode: 'development',
   entry: './src/index',
   output: {
     publicPath: '/',
     filename: 'js/[name].js',
-		chunkFilename: 'js/[name].js',
+		chunkFilename: 'js/[name].[contenthash].js',
     path: path.resolve(__dirname, 'dist')
   },
   module: {
@@ -52,6 +54,7 @@ export default {
     ]
   },
   plugins: [
+    new BundleAnalyzerPlugin(),
     new webpack.HotModuleReplacementPlugin(),
     new HtmlWebpackPlugin({
 			title: '模板',

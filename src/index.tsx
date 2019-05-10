@@ -4,12 +4,14 @@ import * as React from 'react'
 import * as ReactDOM from "react-dom"
 import { BrowserRouter, Route, Redirect, Switch, Link } from 'react-router-dom';
 
+import { shaking2 } from './utils/math'
+
 import asyncComp from './components/asyncComp'
-const Apple = asyncComp(() => import('./components/Apple'))
-const AlphabetInvasion = asyncComp(() => import('./components/AlphabetInvasion'))
-const CatchTheDot = asyncComp(() => import('./components/CatchTheDot'))
-const ChasingBall = asyncComp(() => import('./components/ChasingBall'))
-const LuckyMachine = asyncComp(() => import('./components/LuckyMachine'))
+const Apple = asyncComp(() => import(/* webpackChunkName: "apple" */'./components/Apple'))
+const AlphabetInvasion = asyncComp(() => import(/* webpackChunkName: "a-invasion" */'./components/AlphabetInvasion'))
+const CatchTheDot = asyncComp(() => import(/* webpackChunkName: "catch-dot" */'./components/CatchTheDot'))
+const ChasingBall = asyncComp(() => import(/* webpackChunkName: "chasing-ball" */'./components/ChasingBall'))
+const LuckyMachine = asyncComp(() => import(/* webpackChunkName: "lucky-machine" */'./components/LuckyMachine'))
 
 const Header = () => (
 	<ul>
@@ -19,6 +21,8 @@ const Header = () => (
 		<li><Link to="/phone/lucky">Lucky Machine</Link></li>
 	</ul>
 )
+
+console.log(shaking2) // eslint-disable-line
 
 ReactDOM.render(
 	<div>

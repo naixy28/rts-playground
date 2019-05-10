@@ -4,6 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "publish": "firebase deploy",
+    "build": "rm -rf ./dist && webpack --mode=production",
     "start": "webpack-dev-server",
     "lint": "eslint ./src"
   },
@@ -21,6 +23,7 @@
     "typescript": "^3.3.3333",
     "typings-for-css-modules-loader": "^1.7.0",
     "webpack": "^4.29.0",
+    "webpack-bundle-analyzer": "^3.3.2",
     "webpack-cli": "^3.2.1",
     "webpack-dev-server": "^3.1.14"
   },
