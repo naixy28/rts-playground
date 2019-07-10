@@ -12,6 +12,7 @@ const AlphabetInvasion = asyncComp(() => import(/* webpackChunkName: "a-invasion
 const CatchTheDot = asyncComp(() => import(/* webpackChunkName: "catch-dot" */'./components/CatchTheDot'))
 const ChasingBall = asyncComp(() => import(/* webpackChunkName: "chasing-ball" */'./components/ChasingBall'))
 const LuckyMachine = asyncComp(() => import(/* webpackChunkName: "lucky-machine" */'./components/LuckyMachine'))
+const Ring = asyncComp(() => import(/* webpackChunkName: "ring" */'./components/Ring'))
 
 const Header = () => (
 	<ul>
@@ -19,6 +20,7 @@ const Header = () => (
 		<li><Link to="/phone/al">Alphabet Invasion</Link></li>
 		<li><Link to="/phone/ball">Chasing Ball</Link></li>
 		<li><Link to="/phone/lucky">Lucky Machine</Link></li>
+		<li><Link to="/phone/ring">Ring</Link></li>
 	</ul>
 )
 
@@ -35,6 +37,7 @@ ReactDOM.render(
 				<Route path="/phone/dot" component={CatchTheDot} />
 				<Route path="/phone/ball" component={ChasingBall} />
 				<Route path="/phone/lucky" component={LuckyMachine} />
+				<Route path="/phone/ring" component={Ring} />
 				<Redirect to="/phone/apple" />
 			</Switch>
 			</>
