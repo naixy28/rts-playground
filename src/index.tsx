@@ -3,6 +3,8 @@ import './style.styl'
 import * as React from 'react'
 import * as ReactDOM from "react-dom"
 import { BrowserRouter, Route, Redirect, Switch, Link } from 'react-router-dom';
+import Retry from './components/Retry'
+
 
 import { shaking2 } from './utils/math'
 
@@ -21,6 +23,7 @@ const Header = () => (
 		<li><Link to="/phone/ball">Chasing Ball</Link></li>
 		<li><Link to="/phone/lucky">Lucky Machine</Link></li>
 		<li><Link to="/phone/ring">Ring</Link></li>
+		<li><Link to="/phone/retry">Retry</Link></li>
 	</ul>
 )
 
@@ -38,6 +41,7 @@ ReactDOM.render(
 				<Route path="/phone/ball" component={ChasingBall} />
 				<Route path="/phone/lucky" component={LuckyMachine} />
 				<Route path="/phone/ring" component={Ring} />
+				<Route path="/phone/retry" component={Retry} />
 				<Redirect to="/phone/apple" />
 			</Switch>
 			</>
